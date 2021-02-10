@@ -4,13 +4,67 @@ from rest_framework.generics import get_object_or_404, CreateAPIView
 from rest_framework import generics, request
 
 from .models import Item, Category
-from .serializers import ItemSerializer, CategorySerializer
+from .serializers import ItemSerializer, CategorySerializer, ItemDeleteSerializer
 
 
 
 class ItemDetailView(generics.RetrieveUpdateAPIView):
     serializer_class = ItemSerializer
     queryset = Item.objects.all()
+
+class ItemDeleteView(generics.RetrieveUpdateAPIView):
+
+    '''
+    view for Удаление товаров (товар помечается как удаленный).
+    изменяет параметр deleted для товара. оставляя его в базе.
+    '''
+    serializer_class = ItemDeleteSerializer
+    queryset = Item.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        '''
+        Переопределенная функция из RetriveUpdateAPIView
+        '''
+        instance = self.get_object()
+        instance.deleted = True
+        instance.save()
+        return Response({"success": "success"})
+
+class CategoryDeleteView(generics.RetrieveUpdateAPIView):
+
+    '''
+    view for Удаление категорий (вернуть ошибку если категория прикреплена к товару)
+    изменяет параметр deleted для товара. оставляя его в базе.
+    '''
+    serializer_class = CategorySerializer
+    queryset = Category.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        '''
+        Переопределенная функция из RetriveUpdateAPIView
+        '''
+        useless = True
+        instance = self.get_object()
+        print(instance.pk)
+        all_items = Item.objects.all()
+        print(all_items)
+        for cat in all_items:
+            for el in cat.categories.all():
+                print(el.pk)
+                if el.pk == instance.pk:
+                    useless = False
+                    return Response({"error": "category is applied to a one or a more Item"})
+        if useless == True:
+            instance.delete()
+            instance.save()
+            return Response({"success": "success"})
+
+class CategoryCreateView(generics.CreateAPIView):
+    serializer_class = CategorySerializer
+
+class CategoryListView(generics.ListAPIView):
+    serializer_class = CategorySerializer
+    queryset = Category.objects.all()
 
 class ItemListView(generics.ListAPIView):
     serializer_class = ItemSerializer
@@ -44,85 +98,25 @@ class ItemPriceListView(generics.ListAPIView):
             queryset = queryset.filter(price__gte=min, price__lte=max)
         return queryset
 
+class ItemCategoriesListView(generics.ListAPIView):
+    serializer_class = ItemSerializer
+    '''
+    categories/all?category=<id>
+    '''
+    def get_queryset(self):
+        result = []
+        queryset = Item.objects.all()
+        category = self.request.query_params.get('category', None)
+        if category is not None and category is int:
+            queryset = queryset.filter(categories=category)
+            return queryset
+        elif category.isdigit() == False:
+            for obj in queryset:
+                for el in obj.categories.all():
+                    if el.name.startswith(category):
+                        result.append(obj)
+            queryset = result
+        return queryset
+
 class ItemCreateView(generics.CreateAPIView):
     serializer_class = ItemSerializer
-'''
-
-
-
-class ItemView(CreateAPIView):
-
-    serializer_class = ItemSerializer
-
-    def get(self, request):
-        items = Item.objects.all()
-        serializer = ItemSerializer(items, many=True)
-        return Response({"items": serializer.data})
-
-    def post(self, request):
-        serializer = ItemSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def put(self, request, pk):
-        saved_item = get_object_or_404(Item.objects.all(), pk=pk)
-        data = request.data.get('items')
-        serializer = ItemSerializer(instance=saved_item, data=data, partial=True)
-
-        if serializer.is_valid(raise_exception=True):
-            item_saved = serializer.save()
-
-        return Response(
-            {
-                "success": f"Item {item_saved.name} saved."
-            }
-        )
-
-    def delete(self, request, pk):
-        item = get_object_or_404(Item.objects.all(), pk=pk)
-        item.delete()
-        return Response({
-            "message": "Item with id `{}` has been deleted.".format(pk)
-        }, status=204)
-
-class CategoryView(APIView):
-
-    def get(self, request):
-        categories = Category.objects.all()
-        serializer = CategorySerializer(items, many=True)
-        return Response({"Categories": serializer.data})
-
-    def post(self, request):
-        serializer = CategorySerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class NotDeleteItemsView(APIView):
-
-    def get(self, request):
-
-        items = Item.objects.filter(deleted=False)
-        serializer = ItemSerializer(items, many=True)
-        return Response({"Not delete Items": serializer.data})
-
-class PublishedView(APIView):
-
-    def get(self, request):
-
-        items = Item.objects.filter(published=True)
-        serializer = ItemSerializer(items, many=True)
-        return Response({"Published Items": serializer.data})
-
-class NotPublishedView(APIView):
-
-    def get(self, request):
-
-        items = Item.objects.filter(published=False)
-        serializer = ItemSerializer(items, many=True)
-        return Response({"Not published Items": serializer.data})
-
-'''

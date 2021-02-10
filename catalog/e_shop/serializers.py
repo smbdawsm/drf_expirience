@@ -13,13 +13,17 @@ class ItemListSerializer(serializers.ModelSerializer):
         model = Item
         fields = '__all__'
 
+class ItemDeleteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Item
+        fields = ['name', 'deleted']
 
 
-class CategorySerializer(serializers.Serializer):
+class CategorySerializer(serializers.ModelSerializer):
 
 
     class Meta:
 
         model = Category
-        fields = ['name']
+        fields = '__all__'
 
