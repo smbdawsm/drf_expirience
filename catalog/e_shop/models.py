@@ -4,8 +4,8 @@ from django.db import models
 class Item(models.Model):
 
     categories = models.ManyToManyField('Category', related_name='Categories')
-    price = models.IntegerField()
-    name = models.CharField(max_length=100)
+    price = models.IntegerField(verbose_name='Price')
+    name = models.CharField(verbose_name="name", max_length=100)
     description = models.TextField(default='')
     published = models.BooleanField()
     deleted = models.BooleanField()
