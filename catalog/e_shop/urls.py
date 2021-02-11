@@ -2,7 +2,7 @@ from django.urls import path
 
 from .views import (ItemListView, ItemCreateView, ItemDetailView, ItemDeletedListView, ItemPublishedListView,
                     ItemPriceListView, ItemCategoriesListView, CategoryListView, CategoryCreateView,
-                    ItemDeleteView, CategoryDeleteView)
+                    ItemDeleteView, CategoryDeleteView, ItemNameListView)
 
 
 app_name = 'Market'
@@ -19,4 +19,5 @@ urlpatterns = [
     path('categories/create', CategoryCreateView.as_view()),
     path('categories/delete/<int:pk>', CategoryDeleteView.as_view()),
     path('items/delete/<int:pk>', ItemDeleteView.as_view()),
+    path('items/name', ItemNameListView.as_view()),
 ]

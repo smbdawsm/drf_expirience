@@ -98,6 +98,16 @@ class ItemPriceListView(generics.ListAPIView):
             queryset = queryset.filter(price__gte=min, price__lte=max)
         return queryset
 
+class ItemNameListView(generics.ListAPIView):
+    serializer_class = ItemSerializer
+
+    def get_queryset(self):
+        queryset = Item.objects.all()
+        name = self.request.query_params.get('name', None)
+        if name is not None:
+            queryset = queryset.filter(name__startswith=name)
+        return queryset
+
 class ItemCategoriesListView(generics.ListAPIView):
     serializer_class = ItemSerializer
     '''
