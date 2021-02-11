@@ -1,2 +1,4 @@
 .venv/
 catalog/__pycache__/
+.idea/
+catalog/db.sqlite3
