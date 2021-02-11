@@ -1,7 +1,5 @@
 from rest_framework.response import Response
-from rest_framework.views import APIView, status
-from rest_framework.generics import get_object_or_404, CreateAPIView
-from rest_framework import generics, request
+from rest_framework import generics
 
 from .models import Item, Category
 from .serializers import ItemSerializer, CategorySerializer, ItemDeleteSerializer
@@ -9,6 +7,7 @@ from .serializers import ItemSerializer, CategorySerializer, ItemDeleteSerialize
 
 
 class ItemDetailView(generics.RetrieveUpdateAPIView):
+
     serializer_class = ItemSerializer
     queryset = Item.objects.all()
 
@@ -45,12 +44,9 @@ class CategoryDeleteView(generics.RetrieveUpdateAPIView):
         '''
         useless = True
         instance = self.get_object()
-        print(instance.pk)
         all_items = Item.objects.all()
-        print(all_items)
         for cat in all_items:
             for el in cat.categories.all():
-                print(el.pk)
                 if el.pk == instance.pk:
                     useless = False
                     return Response({"error": "category is applied to a one or a more Item"})
@@ -60,21 +56,26 @@ class CategoryDeleteView(generics.RetrieveUpdateAPIView):
             return Response({"success": "success"})
 
 class CategoryCreateView(generics.CreateAPIView):
+
     serializer_class = CategorySerializer
 
 class CategoryListView(generics.ListAPIView):
+
     serializer_class = CategorySerializer
     queryset = Category.objects.all()
 
 class ItemListView(generics.ListAPIView):
+
     serializer_class = ItemSerializer
     queryset = Item.objects.all()
 
 class ItemDeletedListView(generics.ListAPIView):
+
     serializer_class = ItemSerializer
     queryset = Item.objects.filter(deleted=False)
 
 class ItemPublishedListView(generics.ListAPIView):
+
     serializer_class = ItemSerializer
 
     def get_queryset(self):
@@ -88,6 +89,7 @@ class ItemPublishedListView(generics.ListAPIView):
         return queryset
 
 class ItemPriceListView(generics.ListAPIView):
+
     serializer_class = ItemSerializer
 
     def get_queryset(self):
@@ -99,6 +101,7 @@ class ItemPriceListView(generics.ListAPIView):
         return queryset
 
 class ItemNameListView(generics.ListAPIView):
+
     serializer_class = ItemSerializer
 
     def get_queryset(self):
@@ -109,6 +112,7 @@ class ItemNameListView(generics.ListAPIView):
         return queryset
 
 class ItemCategoriesListView(generics.ListAPIView):
+
     serializer_class = ItemSerializer
     '''
     categories/all?category=<id>

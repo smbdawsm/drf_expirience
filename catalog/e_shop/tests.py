@@ -1,13 +1,12 @@
 from django.test import TestCase
 from rest_framework.test import APIRequestFactory
-from .views import ItemDetailView, CategoryListView, CategoryCreateView
+from .views import  CategoryListView, CategoryCreateView
 from rest_framework import status
 
 
 class ItemTestCase(TestCase):
 
-    
-    
+
     def test_creation(self):
         view = CategoryCreateView.as_view()
         view2 = CategoryListView.as_view()
